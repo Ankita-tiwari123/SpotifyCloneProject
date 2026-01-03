@@ -94,10 +94,13 @@ Ankita Tiwari
 B.Tech Computer Science Student
 Frontend Web Development Enthusiast
 
+spotifycloneproject.vercel.app
+
 📜 License
 
 This project is for educational purposes only.
 No copyright infringement intended.
 
 ⭐ If you like this project, give it a star on GitHub!
+
 
