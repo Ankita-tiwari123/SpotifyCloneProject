@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Music Player</title>
+    <style>
+        /* Basic Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2c2c54;
+            color: #fff;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        h1 {
+            text-align: center;
+        }
+        .player-container {
+            background: #333;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        .cover {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+        .controls button {
+            background: #0fbcf9;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #fff;
+            font-size: 1rem;
+        }
+        .controls button:hover {
+            background: #4bcffa;
+        }
+        .progress-bar {
+            margin: 10px 0;
+            width: 100%;
+        }
+        .progress-bar input {
+            width: 100%;
+        }
+        .song-info {
+            text-align: center;
+            margin: 10px 0;
+        }
+        .playlist {
+            list-style: none;
+            padding: 0;
+        }
+        .playlist li {
+            padding: 10px;
+            border: 1px solid #555;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+        .playlist li:hover {
+            background: #0fbcf9;
+            color: #fff;
+        }
+        .playlist .active {
+            background: #4bcffa;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive Music Player</h1>
+    <div class="player-container">
+        <img src="https://via.placeholder.com/350x150" alt="Cover" class="cover" id="cover">
+        <div class="song-info">
+            <h3 id="song-title">Select a song</h3>
+        </div>
+        <div class="progress-bar">
+            <input type="range" id="progress" min="0" max="100" value="0">
+        </div>
+        <div class="controls">
+            <button id="prev">⏮️ Previous</button>
+            <button id="play-pause">▶️ Play</button>
+            <button id="next">⏭️ Next</button>
+        </div>
+        <ul class="playlist" id="playlist"></ul>
+    </div>
+
+    <script>
+        // Songs and Covers
+        const songs = [
+            {
+                title: "Song 1",
+                src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+                cover: "https://via.placeholder.com/350x150?text=Song+1"
+            },
+            {
+                title: "Song 2",
+                src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+                cover: "https://via.placeholder.com/350x150?text=Song+2"
+            },
+            {
+                title: "Song 3",
+                src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+                cover: "https://via.placeholder.com/350x150?text=Song+3"
+            }
+        ];
+
+        // DOM Elements
+        const cover = document.getElementById('cover');
+        const songTitle = document.getElementById('song-title');
+        const progress = document.getElementById('progress');
+        const playPauseBtn = document.getElementById('play-pause');
+        const prevBtn = document.getElementById('prev');
+        const nextBtn = document.getElementById('next');
+        const playlist = document.getElementById('playlist');
+
+        let currentSongIndex = 0;
+        let isPlaying = false;
+        const audio = new Audio();
+
+        // Load Playlist
+        function loadPlaylist() {
+            playlist.innerHTML = '';
+            songs.forEach((song, index) => {
+                const li = document.createElement('li');
+                li.textContent = song.title;
+                li.dataset.index = index;
+                if (index === currentSongIndex) li.classList.add('active');
+                li.addEventListener('click', () => selectSong(index));
+                playlist.appendChild(li);
+            });
+        }
+
+        // Load Song
+        function loadSong(index) {
+            const song = songs[index];
+            songTitle.textContent = song.title;
+            cover.src = song.cover;
+            audio.src = song.src;
+            updatePlaylist(index);
+        }
+
+        // Update Playlist Highlight
+        function updatePlaylist(index) {
+            const items = playlist.querySelectorAll('li');
+            items.forEach(item => item.classList.remove('active'));
+            items[index].classList.add('active');
+        }
+
+        // Play or Pause
+        function playPause() {
+            if (isPlaying) {
+                audio.pause();
+                playPauseBtn.textContent = '▶️ Play';
+            } else {
+                audio.play();
+                playPauseBtn.textContent = '⏸️ Pause';
+            }
+            isPlaying = !isPlaying;
+        }
+
+        // Previous Song
+        function prevSong() {
+            currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+            loadSong(currentSongIndex);
+            audio.play();
+            isPlaying = true;
+            playPauseBtn.textContent = '⏸️ Pause';
+        }
+
+        // Next Song
+        function nextSong() {
+            currentSongIndex = (currentSongIndex + 1) % songs.length;
+            loadSong(currentSongIndex);
+            audio.play();
+            isPlaying = true;
+            playPauseBtn.textContent = '⏸️ Pause';
+        }
+
+        // Update Progress Bar
+        function updateProgress() {
+            progress.value = (audio.currentTime / audio.duration) * 100 || 0;
+        }
+
+        // Seek Song
+        function seekSong() {
+            audio.currentTime = (progress.value / 100) * audio.duration;
+        }
+
+        // Select Song
+        function selectSong(index) {
+            currentSongIndex = index;
+            loadSong(currentSongIndex);
+            audio.play();
+            isPlaying = true;
+            playPauseBtn.textContent = '⏸️ Pause';
+        }
+
+        // Event Listeners
+        playPauseBtn.addEventListener('click', playPause);
+        prevBtn.addEventListener('click', prevSong);
+        nextBtn.addEventListener('click', nextSong);
+        progress.addEventListener('input', seekSong);
+        audio.addEventListener('timeupdate', updateProgress);
+        audio.addEventListener('ended', nextSong);
+
+        // Initialize
+        loadSong(currentSongIndex);
+        loadPlaylist();
+    </script>
+</body>
+</html>
